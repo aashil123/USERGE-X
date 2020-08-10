@@ -2,7 +2,7 @@
 <br>
 
 <p align="center">
-    <a href="https://github.com/FLAMEPOSEIDON/USERGE-X"><img src="https://i.imgur.com/53mdl2v.png" alt="Userge-x" width=400px></a>
+    <a href="https://github.com/FLAMEPOSEIDON/USERGE-X"><img src="resources/chandu.png" alt="Userge-x" width=400px></a>
     <br>
     <br>
 </p>
