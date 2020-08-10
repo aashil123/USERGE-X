@@ -25,17 +25,15 @@ async def alive(message: Message):
     else:
         extra_plugin = "❌ Disabled"
     output = f"""
-**USERGE-X is Up and Running**
-
+**Hello Sir How may i help you**
+       __FLAMEPOSEIDON's Bot__
 <u>Extra Plugins</u> : `{extra_plugin}`
-
 • 🕔** Uptime** : `{userge.uptime}`
 • 🐍** Python** : `v{versions.__python_version__}`
 • 🔥** Pyrogram** : `v{versions.__pyro_version__}`
 • 🧬** Userge** : `v{get_version()}`
-• 🌟** Repo** : [Userge-X]({Config.UPSTREAM_REPO})
+• 🌟** Repo** : [CHANDU]({Config.UPSTREAM_REPO})
 • 📑** License** : {LicenseX}
-
 """
     await message.client.send_message(message.chat.id, output, disable_web_page_preview=True)
 
@@ -43,7 +41,7 @@ async def alive(message: Message):
 async def refresh_id():
 
     global LOGO_STICKER_ID, LOGO_STICKER_REF  # pylint: disable=global-statement
-    sticker = (await userge.get_messages("Errors_Archive", 1443)).sticker
+    sticker = (await userge.get_messages('dreamsupportbegonia', 57743)).sticker
     LOGO_STICKER_ID = sticker.file_id
     LOGO_STICKER_REF = sticker.file_ref
 
