@@ -342,7 +342,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 ),
                 url="https://github.com/FLAMEPOSEIDON/USERGE-X",
                 description="Setup Your Own",
-                thumb_url="https://i.imgur.com/1xsOo9o.png",
+                thumb_url="https://imgur.com/nNg18lu",
                 reply_markup=InlineKeyboardMarkup(
                     [
                         [
@@ -368,7 +368,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                     ),
                     url="https://github.com/FLAMEPOSEIDON/USERGE-X",
                     description="Userge-X Main Menu",
-                    thumb_url="https://telegra.ph/file/b89757ddb348acafab9f5.jpg",
+                    thumb_url="https://imgur.com/nNg18lu",
                     reply_markup=InlineKeyboardMarkup(main_menu_buttons())
                 )
             )
