@@ -403,11 +403,11 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                     )           
             results.append(MAIN_MENU)             
         
-            if string == "syntax":
+            if string == "chandan":
                 owner = [[
                         InlineKeyboardButton(
                         text="Contact", 
-                        url="https://t.me/deleteduser420"
+                        url="https://t.me/FLAMEPOSEIDON"
                         )
                 ]]
                 results.append(
