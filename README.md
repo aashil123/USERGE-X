@@ -88,7 +88,6 @@
   
   > Finally turn on the app and check the logs (settings -> view logs) :)
 
-<br>
 <h3><a href="https://telegra.ph/Other-Method-08-10">Other Methods</a></h3>
 
 
@@ -98,7 +97,7 @@
 <br>
 
 <h3 align="center">Youtube Tutorial<h3>
-<p align="center"><a href="https://youtu.be/M4T_BJvFqkc"><img src="https://i.imgur.com/2mDbUXW.png" width=300px></a>
+<p align="center"><a href="https://youtu.be/M4T_BJvFqkc"><img src="https://i.imgur.com/VVgSk2m.png" width=250px></a>
 </p>
 
 ### Project Credits 

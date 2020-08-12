@@ -10,14 +10,14 @@
 
 from math import ceil
 from uuid import uuid4
+import asyncio
 from typing import List, Callable, Dict, Union, Any
-
+from userge.utils import parse_buttons as pb
 from pyrogram import (
     InlineQueryResultArticle, InputTextMessageContent,
     InlineKeyboardMarkup, InlineKeyboardButton,
-    Filters, CallbackQuery, InlineQuery)
-from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid
-
+    Filters, CallbackQuery, InlineQuery, InlineQueryResultPhoto)
+from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid, UserIsBot, BadRequest, MessageEmpty
 from userge import userge, Message, Config, get_collection
 
 _CATEGORY = {
@@ -31,6 +31,23 @@ _CATEGORY = {
     'plugins': '💎'
 }
 SAVED_SETTINGS = get_collection("CONFIGS")
+
+REPO_X = InlineQueryResultArticle(
+                    id=uuid4(),
+                    title="Repo",
+                    input_message_content=InputTextMessageContent(
+                        "**Here's how to setup USERGE-X** "),
+                    url="https://github.com/code-rgb/USERGE-X",
+                    description="Setup Your Own",
+                    thumb_url="https://i.imgur.com/1xsOo9o.png",
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(                  
+                                    "🔥 USERGE-X Repo",
+                                    url="https://github.com/code-rgb/USERGE-X"),
+                                InlineKeyboardButton(
+                                    "🚀 Deploy USERGE-X",
+                                    url=("https://heroku.com/deploy?template="
+                                        "https://github.com/UsergeTeam/Userge/tree/master"))]]))
+
 
 
 async def _init() -> None:
@@ -370,6 +387,99 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                     description="Userge-X Main Menu",
                     thumb_url="https://imgur.com/nNg18lu",
                     reply_markup=InlineKeyboardMarkup(main_menu_buttons())
+        results = []
+        string = inline_query.query.lower()
+        if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID:
+            MAIN_MENU = InlineQueryResultArticle(
+                        id=uuid4(),
+                        title="Main Menu",
+                        input_message_content=InputTextMessageContent(
+                            " **USERGE-X** 𝐌𝐚𝐢𝐧 𝐌𝐞𝐧𝐮 "
+                        ),
+                        url="https://github.com/code-rgb/USERGE-X",
+                        description="Userge-X Main Menu",
+                        thumb_url="https://i.imgur.com/1xsOo9o.png",
+                        reply_markup=InlineKeyboardMarkup(main_menu_buttons())
+                    )           
+            results.append(MAIN_MENU)             
+        
+            if string == "syntax":
+                owner = [[
+                        InlineKeyboardButton(
+                        text="Contact", 
+                        url="https://t.me/deleteduser420"
+                        )
+                ]]
+                results.append(
+                        InlineQueryResultPhoto(
+                            photo_url="https://coverfiles.alphacoders.com/123/123388.png",
+                            caption="Hey I solved **𝚂𝚢𝚗𝚝𝚊𝚡's ░ Σrr♢r**",
+                            reply_markup=InlineKeyboardMarkup(owner)
+                        )
                 )
-            )
+
+            if string =="rick":
+                rick = [[
+                        InlineKeyboardButton(
+                        text="Press For Help", 
+                        url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        )
+                ]]                           
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="Not a Rick Roll",
+                            input_message_content=InputTextMessageContent(
+                                "🔍 Search Results"
+                            ),
+                            description="Definately Not a Rick Roll",
+                            thumb_url="https://i.imgur.com/hRCaKAy.png",
+                            reply_markup=InlineKeyboardMarkup(rick)
+                        )
+                )
+
+            if string =="notfound":
+                notfound = [[
+                        InlineKeyboardButton(
+                        text="notfound", 
+                        url="https://image.freepik.com/free-vector/error-404-concept-landing-page_52683-18367.jpg"
+                        )
+                ]]                           
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="notfound",
+                            input_message_content=InputTextMessageContent(
+                                "notfound"
+                            ),
+                            url="https://image.freepik.com/free-vector/error-404-concept-landing-page_52683-18367.jpg",
+                            description="notfound",
+                           
+                            reply_markup=InlineKeyboardMarkup(notfound)
+                        )
+                )                    
+            if string =="repo":        
+                results.append(REPO_X)
+
+            if string =="buttonnn":
+                BUTTON_BASE = get_collection("TEMP_BUTTON")  
+                async for data in BUTTON_BASE.find():
+                    button_data = data['msg_data']
+                text, buttons = pb(button_data)
+                
+                results.append(
+                            InlineQueryResultArticle(
+                                id=uuid4(),
+                                title=text,
+                                input_message_content=InputTextMessageContent(text),
+                                #description="Definately Not a Rick Roll",
+                            # thumb_url="https://i.imgur.com/hRCaKAy.png",
+                                reply_markup=buttons
+                            )
+                )
+# TODO: make pb for inline buttons  
+        else:
+            results.append(REPO_X)
+
         await inline_query.answer(results=results, cache_time=1)
+        return
