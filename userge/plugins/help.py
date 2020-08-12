@@ -373,7 +373,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 ]]
                 results.append(
                         InlineQueryResultPhoto(
-                            photo_url="https://imgur.com/NUz2yHA",
+                            photo_url="https://telegra.ph/file/c222750a69074225f7aae.jpg",
                             caption="**CHANDU | POSEIDON**",
                             reply_markup=InlineKeyboardMarkup(owner)
                         )
