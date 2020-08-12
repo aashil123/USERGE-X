@@ -39,7 +39,7 @@ REPO_X = InlineQueryResultArticle(
                         "**Here's how to setup USERGE-X** "),
                     url="https://github.com/FLAMEPOSEIDON/USERGE-X",
                     description="Setup Your Own",
-                    thumb_url="https://imgur.com/nNg18lu",
+                    thumb_url="https://telegra.ph/file/9d311491a1829eb334bc0.jpg",
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(                  
                                     "🔥 USERGE-X Repo",
                                     url="https://github.com/FLAMEPOSEIDON/USERGE-X"),
@@ -359,7 +359,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                         ),
                         url="https://github.com/FLAMEPOSEIDON/USERGE-X",
                         description="Userge-X Main Menu",
-                        thumb_url="https://imgur.com/nNg18lu",
+                        thumb_url="https://telegra.ph/file/9d311491a1829eb334bc0.jpg",
                         reply_markup=InlineKeyboardMarkup(main_menu_buttons())
                     )           
             results.append(MAIN_MENU)             
