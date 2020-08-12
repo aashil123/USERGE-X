@@ -373,8 +373,8 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 ]]
                 results.append(
                         InlineQueryResultPhoto(
-                            photo_url="https://coverfiles.alphacoders.com/123/123388.png",
-                            caption="Hey I solved **𝚂𝚢𝚗𝚝𝚊𝚡's ░ Σrr♢r**",
+                            photo_url="https://imgur.com/NUz2yHA",
+                            caption="**CHANDU | POSEIDON**",
                             reply_markup=InlineKeyboardMarkup(owner)
                         )
                 )
