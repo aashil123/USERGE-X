@@ -364,7 +364,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                     )           
             results.append(MAIN_MENU)             
         
-            if string == "Chandan":
+            if string == "chandan":
                 owner = [[
                         InlineKeyboardButton(
                         text="Contact", 
