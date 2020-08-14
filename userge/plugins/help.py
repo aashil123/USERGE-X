@@ -48,8 +48,19 @@ REPO_X = InlineQueryResultArticle(
                                     url=("https://heroku.com/deploy?template="
                                         "https://github.com/UsergeTeam/Userge/tree/master"))]]))
 
+BUTTON_BASE = get_collection("TEMP_BUTTON")
 
+if {Config.LOAD_UNOFFICIAL_PLUGINS}:
+    extra_plugin = "✅ Enabled"
+else:
+    extra_plugin = "❌ Disabled"
 
+ALIVE_INFO = f"""
+<b> <a href="tg://msg?text=I_Am_Using_USERGE-X_⚡️">USERGE-X</a></b> is Up and Running 🏃
+│   
+└─ Extra Plugins :  <code>{extra_plugin}</code>
+                
+"""
 async def _init() -> None:
     data = await SAVED_SETTINGS.find_one({'_id': 'CURRENT_CLIENT'})
     if data:
@@ -63,6 +74,8 @@ async def helpme(message: Message) -> None:  # pylint: disable=missing-function-
         out_str = f"""⚒ <b><u>(<code>{len(plugins)}</code>) Plugin(s) Available</u></b>\n\n"""
         cat_plugins = userge.manager.get_all_plugins()
         for cat in sorted(cat_plugins):
+            if cat == "plugins":
+                continue
             out_str += (f"    {_CATEGORY.get(cat, '📁')} <b>{cat}</b> "
                         f"(<code>{len(cat_plugins[cat])}</code>) :   <code>"
                         + "</code>    <code>".join(sorted(cat_plugins[cat])) + "</code>\n\n")
@@ -263,7 +276,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 tmp_btns.append(InlineKeyboardButton(
                     "🔄 Refresh", callback_data=f"refresh({cur_pos})".encode()))
         else:
-            cur_clnt = "🎴 USER" if Config.USE_USER_FOR_CLIENT_CHECKS else "⚙️ BOT"
+            cur_clnt = "👤 USER" if Config.USE_USER_FOR_CLIENT_CHECKS else "⚙️ BOT"
             tmp_btns.append(InlineKeyboardButton(
                 f"🔩 Client for Checks and Sudos : {cur_clnt}", callback_data="chgclnt".encode()))
         return [tmp_btns]
@@ -346,11 +359,14 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
         buttons = [tmp_btns] + buttons
         return text, buttons
 
+
+
+
     @ubot.on_inline_query()
     async def inline_answer(_, inline_query: InlineQuery):
         results = []
         string = inline_query.query.lower()
-        if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID:
+        if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID or inline_query.from_user.id in Config.SUDO_USERS:
             MAIN_MENU = InlineQueryResultArticle(
                         id=uuid4(),
                         title="Main Menu",
@@ -382,7 +398,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
             if string =="rick":
                 rick = [[
                         InlineKeyboardButton(
-                        text="Press For Help", 
+                        text="Go", 
                         url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                         )
                 ]]                           
@@ -399,46 +415,45 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                         )
                 )
 
-            if string =="notfound":
-                notfound = [[
-                        InlineKeyboardButton(
-                        text="notfound", 
-                        url="https://image.freepik.com/free-vector/error-404-concept-landing-page_52683-18367.jpg"
-                        )
-                ]]                           
+            if string =="alive":
+                buttons = [[InlineKeyboardButton("ℹ️ INFO", callback_data="info_btn"),
+                            InlineKeyboardButton(text="⚡️ REPO", url="https://github.com/code-rgb/USERGE-X")]]
                 results.append(
-                        InlineQueryResultArticle(
-                            id=uuid4(),
-                            title="notfound",
-                            input_message_content=InputTextMessageContent(
-                                "notfound"
-                            ),
-                            url="https://image.freepik.com/free-vector/error-404-concept-landing-page_52683-18367.jpg",
-                            description="notfound",
-                           
-                            reply_markup=InlineKeyboardMarkup(notfound)
+                        InlineQueryResultPhoto(
+                            photo_url="https://i.imgur.com/Cb2vE4t.jpg",
+                            caption=ALIVE_INFO,
+                            reply_markup=InlineKeyboardMarkup(buttons)
                         )
-                )                    
+                )
+                
             if string =="repo":        
                 results.append(REPO_X)
 
-            if string =="buttonnn":
-                BUTTON_BASE = get_collection("TEMP_BUTTON")  
+            if string =="buttonnn":          
                 async for data in BUTTON_BASE.find():
                     button_data = data['msg_data']
                 text, buttons = pb(button_data)
-                
-                results.append(
-                            InlineQueryResultArticle(
-                                id=uuid4(),
-                                title=text,
-                                input_message_content=InputTextMessageContent(text),
-                                #description="Definately Not a Rick Roll",
-                            # thumb_url="https://i.imgur.com/hRCaKAy.png",
+                try:
+                    photo_url = data['photo_url']
+                except KeyError:
+                    photo_url = None
+                if photo_url:
+                    results.append(
+                            InlineQueryResultPhoto(
+                                photo_url=photo_url,
+                                caption=text,
                                 reply_markup=buttons
                             )
-                )
-# TODO: make pb for inline buttons  
+                    )
+                else:    
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title=text,
+                                    input_message_content=InputTextMessageContent(text),
+                                    reply_markup=buttons
+                                )
+                    )
         else:
             results.append(REPO_X)
 
