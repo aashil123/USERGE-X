@@ -430,7 +430,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
             if string =="alive":
                 random_alive = random.choice(ALIVE_IMGS) 
                 buttons = [[InlineKeyboardButton("ℹ️ INFO", callback_data="info_btn"),
-                            InlineKeyboardButton(text="⚡️ REPO", url="https://github.com/code-rgb/USERGE-X")]]
+                            InlineKeyboardButton(text="⚡️ REPO", url="https://github.com/FLAMEPOSEEIDON/USERGE-X")]]
                 results.append(
                         InlineQueryResultPhoto(
                             photo_url=random_alive,
