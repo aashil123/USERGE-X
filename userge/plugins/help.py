@@ -7,7 +7,7 @@
 # Please see < https://github.com/uaudith/Userge/blob/master/LICENSE >
 #
 # All rights reserved.
-
+import random
 from math import ceil
 from uuid import uuid4
 import asyncio
@@ -30,7 +30,11 @@ _CATEGORY = {
     'temp': '♻️',
     'plugins': '💎'
 }
+# Database
 SAVED_SETTINGS = get_collection("CONFIGS")
+SECRET_MSG = get_collection("SECRET_MSG")
+BUTTON_BASE = get_collection("TEMP_BUTTON")
+
 
 REPO_X = InlineQueryResultArticle(
                     id=uuid4(),
@@ -48,7 +52,6 @@ REPO_X = InlineQueryResultArticle(
                                     url=("https://heroku.com/deploy?template="
                                         "https://github.com/UsergeTeam/Userge/tree/master"))]]))
 
-BUTTON_BASE = get_collection("TEMP_BUTTON")
 
 if {Config.LOAD_UNOFFICIAL_PLUGINS}:
     extra_plugin = "✅ Enabled"
@@ -61,6 +64,14 @@ ALIVE_INFO = f"""
 └─ Extra Plugins :  <code>{extra_plugin}</code>
                 
 """
+# Shout Out to @FLAMEPOSEIDON For the Images
+
+ALIVE_IMGS = ["https://i.imgur.com/TDuG6ub.jpg", "https://i.imgur.com/uzKdTXG.jpg",
+"https://telegra.ph/file/6ecab390e4974c74c3764.png",
+"https://telegra.ph/file/995c75983a6c0e4499b55.png",
+"https://telegra.ph/file/86cc25c78ad667ca5e691.png",
+"https://i.imgur.com/Cb2vE4t.jpg"]
+
 async def _init() -> None:
     data = await SAVED_SETTINGS.find_one({'_id': 'CURRENT_CLIENT'})
     if data:
@@ -366,6 +377,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
     async def inline_answer(_, inline_query: InlineQuery):
         results = []
         string = inline_query.query.lower()
+        str_x = string.split(" ", 2)
         if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID or inline_query.from_user.id in Config.SUDO_USERS:
             MAIN_MENU = InlineQueryResultArticle(
                         id=uuid4(),
@@ -416,11 +428,12 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 )
 
             if string =="alive":
+                random_alive = random.choice(ALIVE_IMGS) 
                 buttons = [[InlineKeyboardButton("ℹ️ INFO", callback_data="info_btn"),
                             InlineKeyboardButton(text="⚡️ REPO", url="https://github.com/code-rgb/USERGE-X")]]
                 results.append(
                         InlineQueryResultPhoto(
-                            photo_url="https://i.imgur.com/Cb2vE4t.jpg",
+                            photo_url=random_alive,
                             caption=ALIVE_INFO,
                             reply_markup=InlineKeyboardMarkup(buttons)
                         )
@@ -454,6 +467,43 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                                     reply_markup=buttons
                                 )
                     )
+           
+            if str_x[0] == "secret":
+                if len(str_x) == 3:
+                    user_name = str_x[1]
+                    msg = str_x[2]       
+                    try:
+                        a = await userge.get_users(user_name)
+                        user_id = a.id
+                    except:
+                        return
+                    buttons = [[InlineKeyboardButton("🔐 REVEAL", callback_data="secret_btn")]]
+                    await SECRET_MSG.drop()
+                    SECRET_MSG.insert_one({'user_id': user_id, 'msg': msg})
+                
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title="Send A Secret Message",
+                                    input_message_content=InputTextMessageContent(f"☣️ <b>TOPSECRET!</b> for {user_name}. Only he/she can open it."),
+                                    description="secret @username you message here",
+                                    thumb_url="https://i.imgur.com/lx3nT7p.png",
+                                    reply_markup=InlineKeyboardMarkup(buttons)
+                                )
+                    )
+                else:
+                    buttons_h = [[InlineKeyboardButton("See Help", callback_data="secret_btn_help")]]
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title="Send A Secret Message",
+                                    input_message_content=InputTextMessageContent(f"@botname secret @username message"),
+                                    description="secret @username you message here",
+                                    thumb_url="https://i.imgur.com/lx3nT7p.png",
+                                    reply_markup=InlineKeyboardMarkup(buttons_h)
+                                )
+                    )
+
         else:
             results.append(REPO_X)
 
