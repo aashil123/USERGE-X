@@ -17,19 +17,20 @@ from pyrogram import (
     InlineQueryResultArticle, InputTextMessageContent,
     InlineKeyboardMarkup, InlineKeyboardButton,
     Filters, CallbackQuery, InlineQuery, InlineQueryResultPhoto)
-from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid, UserIsBot, BadRequest, MessageEmpty
+from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid, MessageEmpty
 from userge import userge, Message, Config, get_collection, versions, get_version
 
 
 _CATEGORY = {
-    'admin': '👨‍✈️',
+    'admin': '🙋🏻‍♂️',
     'fun': '🎨',
-    'misc': '⚙️',
+    'misc': '🧩',
     'tools': '🧰',
     'utils': '🗂',
-    'Extra': '🍑',
+    'unofficial': '➕',
     'temp': '♻️',
-    'plugins': '💎'
+    'plugins': '💎',
+    'inline' : '🔰' 
 }
 # Database
 SAVED_SETTINGS = get_collection("CONFIGS")
@@ -374,8 +375,9 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
     @ubot.on_inline_query()
     async def inline_answer(_, inline_query: InlineQuery):
         results = []
-        string = inline_query.query.lower()
-        str_x = string.split(" ", 2)
+        i_q = inline_query.query
+        string = i_q.lower()
+        str_x = i_q.split(" ", 2)
         if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID or inline_query.from_user.id in Config.SUDO_USERS:
             MAIN_MENU = InlineQueryResultArticle(
                         id=uuid4(),
@@ -438,17 +440,17 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 )
 
             if string =="gapps":
-                buttons = [[InlineKeyboardButton("Open Gapps", callback_data="open_gapps")],
-                           [InlineKeyboardButton("Flame Gapps", callback_data="flame_gapps")],
-                           [InlineKeyboardButton("Nik Gapps", callback_data="nik_gapps")]]          
+                buttons = [[InlineKeyboardButton("Open GApps", callback_data="open_gapps"),
+                           InlineKeyboardButton("Flame GApps", callback_data="flame_gapps")],
+                           [InlineKeyboardButton("Nik GApps", callback_data="nik_gapps")]]          
                 results.append(
                         InlineQueryResultArticle(
                             id=uuid4(),
-                            title="Gapps",
+                            title="GApps",
                             input_message_content=InputTextMessageContent(
-                                "**LATEST Android 10 arm64 Gapps**"
+                                "[\u200c](https://i.imgur.com/BZBMrfn.jpg) **LATEST Android 10 arm64 GApps**" 
                             ),
-                            description="Get latest gapps link directly from SF",
+                            description="Get Latest GApps Download Links Directly from SF",
                             thumb_url="https://i.imgur.com/Npzw8Ph.png",
                             reply_markup=InlineKeyboardMarkup(buttons)
                         )
@@ -456,6 +458,23 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
 
             if string =="repo":        
                 results.append(REPO_X)
+
+            if str_x[0].lower() == "op" and len(str_x[1]) != 0:        
+                txt = i_q[3:]
+                buttons = [[
+                        InlineKeyboardButton("👍", callback_data="opinion_y"),
+                        InlineKeyboardButton("👎", callback_data="opinion_n")
+                ]]                           
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="Ask For Opinion",
+                            input_message_content=InputTextMessageContent(txt),
+                            description="e.g @yourbot op Are Cats Cute?",
+                            thumb_url="https://i.imgur.com/Zlc98qS.jpg",
+                            reply_markup=InlineKeyboardMarkup(buttons)
+                        )
+                )    
 
             if string =="buttonnn":          
                 async for data in BUTTON_BASE.find():
@@ -483,7 +502,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                                 )
                     )
            
-            if str_x[0] == "secret":
+            if str_x[0].lower() == "secret":
                 if len(str_x) == 3:
                     user_name = str_x[1]
                     msg = str_x[2]       
@@ -518,9 +537,12 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                                     reply_markup=InlineKeyboardMarkup(buttons_h)
                                 )
                     )
-
+        
         else:
             results.append(REPO_X)
-
-        await inline_query.answer(results=results, cache_time=1)
-        return
+        try: 
+            if not len(results) == 0:
+                await inline_query.answer(results=results, cache_time=1)
+        except MessageEmpty:
+            return
+        
