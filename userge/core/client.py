@@ -16,17 +16,17 @@ import time
 import asyncio
 import importlib
 from types import ModuleType
-from typing import List, Awaitable, Any, Optional
+from typing import List, Awaitable, Any, Optional, Union
 
 import psutil
 
 from userge import logging, Config
-from userge.logbot import LogBot
+from userge import logbot
 from userge.utils import time_formatter
 from userge.utils.exceptions import UsergeBotNotFound
 from userge.plugins import get_all_plugins
 from .methods import Methods
-from .ext import RawClient
+from .ext import RawClient, pool
 
 _LOG = logging.getLogger(__name__)
 _LOG_STR = "<<<!  #####  %s  #####  !>>>"
@@ -81,7 +81,7 @@ class _AbstractUserge(Methods, RawClient):
     async def _load_plugins(self) -> None:
         _IMPORTED.clear()
         _INIT_TASKS.clear()
-        LogBot.edit_last_msg("Importing All Plugins", _LOG.info, _LOG_STR)
+        logbot.edit_last_msg("Importing All Plugins", _LOG.info, _LOG_STR)
         for name in get_all_plugins():
             try:
                 await self.load_plugin(name)
@@ -154,14 +154,17 @@ class Userge(_AbstractUserge):
         super().__init__(**kwargs)
 
     @property
-    def bot(self) -> '_UsergeBot':
+    def bot(self) -> Union['_UsergeBot', 'Userge']:
         """ returns usergebot """
         if self._bot is None:
+            if Config.BOT_TOKEN:
+                return self
             raise UsergeBotNotFound("Need BOT_TOKEN ENV!")
         return self._bot
 
     async def start(self) -> None:
         """ start client and bot """
+        pool._start()  # pylint: disable=protected-access
         _LOG.info(_LOG_STR, "Starting Userge")
         await super().start()
         if self._bot is not None:
@@ -171,6 +174,7 @@ class Userge(_AbstractUserge):
 
     async def stop(self) -> None:  # pylint: disable=arguments-differ
         """ stop client and bot """
+        await pool._stop()  # pylint: disable=protected-access
         if self._bot is not None:
             _LOG.info(_LOG_STR, "Stopping UsergeBot")
             await self._bot.stop()
@@ -191,8 +195,8 @@ class Userge(_AbstractUserge):
             run(coro)
         else:
             _LOG.info(_LOG_STR, "Idling Userge")
-            LogBot.edit_last_msg("Userge has Started Successfully !")
-            LogBot.end()
+            logbot.edit_last_msg("Userge has Started Successfully !")
+            logbot.end()
             run(Userge.idle())
         _LOG.info(_LOG_STR, "Exiting Userge")
         for task in running_tasks:

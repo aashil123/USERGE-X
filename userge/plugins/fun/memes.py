@@ -31,7 +31,7 @@ async def kek_(message: Message):
     kek = ["/", "\\"]
     for i in range(1, 9):
         time.sleep(0.3)
-        await message.edit(":" + kek[i % 2])
+        await message.try_to_edit(":" + kek[i % 2])
 
 
 @userge.on_cmd(r"(?:-_-)$",
@@ -44,7 +44,7 @@ async def lol_(message: Message):
         if i % 3 == 0:
             lol = "-_ "
         lol = lol[:-1] + "_-"
-        await message.edit(lol, parse_mode="html")
+        await message.try_to_edit(lol, parse_mode="html")
 
 
 @userge.on_cmd(r"(?:;_;)$",
@@ -57,7 +57,7 @@ async def fun_(message: Message):
         if i % 3 == 0:
             fun = ";_ "
         fun = fun[:-1] + "_;"
-        await message.edit(fun, parse_mode="html")
+        await message.try_to_edit(fun, parse_mode="html")
 
 
 @userge.on_cmd("Oof$", about={'header': "Ooooof"},
@@ -67,7 +67,7 @@ async def Oof_(message: Message):
     Oof = "Oo "
     for _ in range(6):
         Oof = Oof[:-1] + "of"
-        await message.edit(Oof)
+        await message.try_to_edit(Oof)
 
 
 @userge.on_cmd("Hmm$", about={'header': "Hmmmmm"},
@@ -77,7 +77,7 @@ async def Hmm_(message: Message):
     Hmm = "Hm "
     for _ in range(4):
         Hmm = Hmm[:-1] + "mm"
-        await message.edit(Hmm)
+        await message.try_to_edit(Hmm)
 
 
 async def check_and_send(message: Message, *args, **kwargs):
@@ -217,9 +217,9 @@ async def moon_(message: Message):
 @userge.on_cmd("clock$", about={'header': "kensar clock animation"})
 async def clock_(message: Message):
     """clock"""
-    deq = deque(list("🕙🕘🕗🕖🕕🕔🕓🕒🕑🕐🕛"))
+    deq = deque(list("🕚🕙🕘🕗🕖🕕🕔🕓🕒🕑🕐🕛"))
     try:
-        for _ in range(32):
+        for _ in range(36):
             await asyncio.sleep(0.1)
             await message.edit("".join(deq))
             deq.rotate(1)

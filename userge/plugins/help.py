@@ -7,31 +7,69 @@
 # Please see < https://github.com/uaudith/Userge/blob/master/LICENSE >
 #
 # All rights reserved.
-
+import random
 from math import ceil
 from uuid import uuid4
+import asyncio
 from typing import List, Callable, Dict, Union, Any
-
+from userge.utils import parse_buttons as pb
 from pyrogram import (
     InlineQueryResultArticle, InputTextMessageContent,
     InlineKeyboardMarkup, InlineKeyboardButton,
-    Filters, CallbackQuery, InlineQuery)
-from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid
+    Filters, CallbackQuery, InlineQuery, InlineQueryResultPhoto)
+from pyrogram.errors.exceptions.bad_request_400 import MessageNotModified, MessageIdInvalid, MessageEmpty
+from userge import userge, Message, Config, get_collection, versions, get_version
 
-from userge import userge, Message, Config, get_collection
 
 _CATEGORY = {
-    'admin': '👨‍✈️',
+    'admin': '🙋🏻‍♂️',
     'fun': '🎨',
-    'misc': '⚙️',
+    'misc': '🧩',
     'tools': '🧰',
     'utils': '🗂',
-    'Extra': '🍑',
+    'unofficial': '➕',
     'temp': '♻️',
-    'plugins': '💎'
+    'plugins': '💎',
+    'inline' : '🔰' 
 }
+# Database
 SAVED_SETTINGS = get_collection("CONFIGS")
+SECRET_MSG = get_collection("SECRET_MSG")
+BUTTON_BASE = get_collection("TEMP_BUTTON")
 
+
+REPO_X = InlineQueryResultArticle(
+                    id=uuid4(),
+                    title="Repo",
+                    input_message_content=InputTextMessageContent(
+                        "**Here's how to setup USERGE-X** "),
+                    url="https://github.com/FLAMEPOSEIDON/USERGE-X",
+                    description="Setup Your Own",
+                    thumb_url="https://telegra.ph/file/9d311491a1829eb334bc0.jpg",
+                    reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(                  
+                                    "🔥 USERGE-X Repo",
+                                    url="https://github.com/FLAMEPOSEIDON/USERGE-X"),
+                                InlineKeyboardButton(
+                                    "🚀 Deploy USERGE-X",
+                                    url=("https://heroku.com/deploy?template="
+                                        "https://github.com/UsergeTeam/Userge/tree/master"))]]))
+
+
+
+
+# Thanks boi @FLAMEPOSEIDON
+ALIVE_IMGS = ["https://telegra.ph/file/11123ef7dff2f1e19e79d.jpg", "https://i.imgur.com/uzKdTXG.jpg",
+"https://telegra.ph/file/6ecab390e4974c74c3764.png",
+"https://telegra.ph/file/995c75983a6c0e4499b55.png",
+"https://telegra.ph/file/86cc25c78ad667ca5e691.png"]
+
+ALIVE_INFO = f"""
+  **[USERGE-X](https://github.com/code-rgb/USERGE-X) is Up and Running 🏃**
+
+ • 🐍 Python :  `v{versions.__python_version__}`
+ • 🔥 Pyrogram :  `v{versions.__pyro_version__}`
+ • 🧬 Userge :  `v{get_version()}`
+"""
 
 async def _init() -> None:
     data = await SAVED_SETTINGS.find_one({'_id': 'CURRENT_CLIENT'})
@@ -46,6 +84,8 @@ async def helpme(message: Message) -> None:  # pylint: disable=missing-function-
         out_str = f"""⚒ <b><u>(<code>{len(plugins)}</code>) Plugin(s) Available</u></b>\n\n"""
         cat_plugins = userge.manager.get_all_plugins()
         for cat in sorted(cat_plugins):
+            if cat == "plugins":
+                continue
             out_str += (f"    {_CATEGORY.get(cat, '📁')} <b>{cat}</b> "
                         f"(<code>{len(cat_plugins[cat])}</code>) :   <code>"
                         + "</code>    <code>".join(sorted(cat_plugins[cat])) + "</code>\n\n")
@@ -57,10 +97,9 @@ async def helpme(message: Message) -> None:  # pylint: disable=missing-function-
                 and (len(plugins[key].enabled_commands) > 1
                      or plugins[key].enabled_commands[0].name.lstrip(Config.CMD_TRIGGER) != key)):
             commands = plugins[key].enabled_commands
-            out_str = f"""⚔ <b><u>(<code>{len(commands)}</code>) Command(s) Available</u></b>
-
+            out_str = f"""<b><u>(<code>{len(commands)}</code>) Command(s) Available</u></b>
 🔧 <b>Plugin:</b>  <code>{key}</code>
-📘 <b>About:</b>  <code>{plugins[key].about}</code>\n\n"""
+📘 <b>Doc:</b>  <code>{plugins[key].doc}</code>\n\n"""
             for i, cmd in enumerate(commands, start=1):
                 out_str += (f"    🤖 <b>cmd(<code>{i}</code>):</b>  <code>{cmd.name}</code>\n"
                             f"    📚 <b>info:</b>  <i>{cmd.doc}</i>\n\n")
@@ -96,7 +135,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
             else:
                 user_dict = await ubot.get_user_dict(Config.OWNER_ID)
                 await c_q.answer(
-                    f"Only {user_dict['flname']} Can Access this...! Build Your Own @TheUserge 🤘",
+                    f"Only {user_dict['flname']} Can Access this...! Build Your USERGE-X",
                     show_alert=True)
         return wrapper
 
@@ -114,7 +153,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                                     userge.manager.get_all_plugins())
         elif len(pos_list) == 2:
             buttons = parse_buttons(p_num, cur_pos,
-                                    lambda x: f"🗃 {x}",
+                                    lambda x: f"🔹 {x}",
                                     userge.manager.get_all_plugins()[pos_list[-1]])
         elif len(pos_list) == 3:
             _, buttons = plugin_data(cur_pos, p_num)
@@ -130,7 +169,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
             await callback_query.answer("you are in main menu", show_alert=True)
             return
         if len(pos_list) == 2:
-            text = "🖥 **Userge Main Menu** 🖥"
+            text = " **USERGE-X** 𝐌𝐚𝐢𝐧 𝐌𝐞𝐧𝐮 "
             buttons = main_menu_buttons()
         elif len(pos_list) == 3:
             text, buttons = category_data(cur_pos)
@@ -177,7 +216,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
     @check_owner
     async def callback_mm(callback_query: CallbackQuery):
         await callback_query.edit_message_text(
-            "🖥 **Userge Main Menu** 🖥", reply_markup=InlineKeyboardMarkup(main_menu_buttons()))
+            " **USERGE-X** 𝐌𝐚𝐢𝐧 𝐌𝐞𝐧𝐮 ", reply_markup=InlineKeyboardMarkup(main_menu_buttons()))
 
     @ubot.on_callback_query(filters=Filters.regex(pattern=r"^chgclnt$"))
     @check_owner
@@ -212,7 +251,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                       cur_pos: str,
                       func: Callable[[str], str],
                       data: Union[List[str], Dict[str, Any]],
-                      rows: int = 3):
+                      rows: int = 5):
         buttons = [InlineKeyboardButton(
             func(x), callback_data=f"enter({cur_pos}|{x})".encode()) for x in sorted(data)]
         pairs = list(map(list, zip(buttons[::2], buttons[1::2])))
@@ -247,7 +286,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
                 tmp_btns.append(InlineKeyboardButton(
                     "🔄 Refresh", callback_data=f"refresh({cur_pos})".encode()))
         else:
-            cur_clnt = "👲 USER" if Config.USE_USER_FOR_CLIENT_CHECKS else "🤖 BOT"
+            cur_clnt = "👤 USER" if Config.USE_USER_FOR_CLIENT_CHECKS else "⚙️ BOT"
             tmp_btns.append(InlineKeyboardButton(
                 f"🔩 Client for Checks and Sudos : {cur_clnt}", callback_data="chgclnt".encode()))
         return [tmp_btns]
@@ -256,21 +295,20 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
         pos_list = cur_pos.split('|')
         plugins = userge.manager.get_all_plugins()[pos_list[1]]
         text = (f"**(`{len(plugins)}`) Plugin(s) Under : "
-                f"`{_CATEGORY.get(pos_list[1], '📁')} {pos_list[1]}` 🎭 Category**")
+                f"`{_CATEGORY.get(pos_list[1], '📁')} {pos_list[1]}`  Category**")
         buttons = parse_buttons(0, '|'.join(pos_list[:2]),
-                                lambda x: f"🗃 {x}",
+                                lambda x: f"🔹 {x}",
                                 plugins)
         return text, buttons
 
     def plugin_data(cur_pos: str, p_num: int = 0):
         pos_list = cur_pos.split('|')
         plg = userge.manager.plugins[pos_list[2]]
-        text = f"""🗃 **--Plugin Status--** 🗃
-
+        text = f"""🔹 **--Plugin Status--** 🔹
 🎭 **Category** : `{pos_list[1]}`
 🔖 **Name** : `{plg.name}`
-📝 **About** : `{plg.about}`
-⚔ **Commands** : `{len(plg.commands)}`
+📝 **Doc** : `{plg.doc}`
+◾️ **Commands** : `{len(plg.commands)}`
 ⚖ **Filters** : `{len(plg.filters)}`
 ✅ **Loaded** : `{plg.is_loaded}`
 ➕ **Enabled** : `{plg.is_enabled}`
@@ -289,7 +327,7 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
             tmp_btns.append(InlineKeyboardButton(
                 "➕ Enable", callback_data=f"enable({'|'.join(pos_list[:3])})".encode()))
         buttons = parse_buttons(p_num, '|'.join(pos_list[:3]),
-                                lambda x: f"⚖ {x}" if is_filter(x) else f"⚔ {x}",
+                                lambda x: f"⚖ {x}" if is_filter(x) else f" {x}",
                                 (flt.name for flt in plg.commands + plg.filters))
         buttons = buttons[:-1] + [tmp_btns] + [buttons[-1]]
         return text, buttons
@@ -299,25 +337,20 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
         plg = userge.manager.plugins[pos_list[2]]
         flts = {flt.name: flt for flt in plg.commands + plg.filters}
         flt = flts[pos_list[-1]]
-        if hasattr(flt, 'doc'):
-            text = f"""⚔ **--Command Status--** ⚔
-
+        flt_data = f"""
 🔖 **Name** : `{flt.name}`
 📝 **Doc** : `{flt.doc}`
 🤖 **Via Bot** : `{flt.allow_via_bot}`
 ✅ **Loaded** : `{flt.is_loaded}`
-➕ **Enabled** : `{flt.is_enabled}`
-
+➕ **Enabled** : `{flt.is_enabled}`"""
+        if hasattr(flt, 'about'):
+            text = f"""**--Command Status--**
+{flt_data}
 {flt.about}
 """
         else:
             text = f"""⚖ **--Filter Status--** ⚖
-
-🔖 **Name** : `{flt.name}`
-📝 **About** : `{flt.about}`
-🤖 **Via Bot** : `{flt.allow_via_bot}`
-✅ **Loaded** : `{flt.is_loaded}`
-➕ **Enabled** : `{flt.is_enabled}`
+{flt_data}
 """
         buttons = default_buttons(cur_pos)
         tmp_btns = []
@@ -336,45 +369,180 @@ if Config.BOT_TOKEN and Config.OWNER_ID:
         buttons = [tmp_btns] + buttons
         return text, buttons
 
+
+
+
     @ubot.on_inline_query()
     async def inline_answer(_, inline_query: InlineQuery):
-        results = [
-            InlineQueryResultArticle(
-                id=uuid4(),
-                title="Repo",
-                input_message_content=InputTextMessageContent(
-                    "**Here's how to setup Userge** 😎"
-                ),
-                url="https://github.com/UsergeTeam/Userge",
-                description="Setup Your Own",
-                thumb_url="https://imgur.com/download/Inyeb1S",
-                reply_markup=InlineKeyboardMarkup(
-                    [
-                        [
-                            InlineKeyboardButton(
-                                "🧰 Userge Repo",
-                                url="https://github.com/UsergeTeam/Userge"),
-                            InlineKeyboardButton(
-                                "🖥 Deploy Userge",
-                                url=("https://heroku.com/deploy?template="
-                                     "https://github.com/UsergeTeam/Userge/tree/master"))
-                        ]
-                    ]
+        results = []
+        i_q = inline_query.query
+        string = i_q.lower()
+        str_x = i_q.split(" ", 2)
+        if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID or inline_query.from_user.id in Config.SUDO_USERS:
+            MAIN_MENU = InlineQueryResultArticle(
+                        id=uuid4(),
+                        title="Main Menu",
+                        input_message_content=InputTextMessageContent(
+                            " **USERGE-X** 𝐌𝐚𝐢𝐧 𝐌𝐞𝐧𝐮 "
+                        ),
+                        url="https://github.com/FLAMEPOSEIDON/USERGE-X",
+                        description="Userge-X Main Menu",
+                        thumb_url="https://telegra.ph/file/9d311491a1829eb334bc0.jpg",
+                        reply_markup=InlineKeyboardMarkup(main_menu_buttons())
+                    )           
+            results.append(MAIN_MENU)             
+        
+            if string == "chandan":
+                owner = [[
+                        InlineKeyboardButton(
+                        text="Contact", 
+                        url="https://t.me/FLAMEPOSEIDON"
+                        )
+                ]]
+                results.append(
+                        InlineQueryResultPhoto(
+                            photo_url="https://telegra.ph/file/c222750a69074225f7aae.jpg",
+                            caption="**CHANDU | POSEIDON**",
+                            reply_markup=InlineKeyboardMarkup(owner)
+                        )
                 )
-            )
-        ]
-        if inline_query.from_user and inline_query.from_user.id == Config.OWNER_ID:
-            results.append(
-                InlineQueryResultArticle(
-                    id=uuid4(),
-                    title="Main Menu",
-                    input_message_content=InputTextMessageContent(
-                        "🖥 **Userge Main Menu** 🖥"
-                    ),
-                    url="https://github.com/UsergeTeam/Userge",
-                    description="Userge Main Menu",
-                    thumb_url="https://imgur.com/download/Inyeb1S",
-                    reply_markup=InlineKeyboardMarkup(main_menu_buttons())
+
+            if string =="rick":
+                rick = [[
+                        InlineKeyboardButton(
+                        text="Go", 
+                        url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        )
+                ]]                           
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="Not a Rick Roll",
+                            input_message_content=InputTextMessageContent(
+                                "🔍 Search Results"
+                            ),
+                            description="Definately Not a Rick Roll",
+                            thumb_url="https://i.imgur.com/hRCaKAy.png",
+                            reply_markup=InlineKeyboardMarkup(rick)
+                        )
                 )
-            )
-        await inline_query.answer(results=results, cache_time=1)
+
+            if string =="alive":
+                random_alive = random.choice(ALIVE_IMGS) 
+                buttons = [[InlineKeyboardButton("🔧 SETTINGS", callback_data="settings_btn"),
+                            InlineKeyboardButton(text="⚡️ REPO", url=Config.UPSTREAM_REPO)]]
+                results.append(
+                        InlineQueryResultPhoto(
+                            photo_url=random_alive,
+                            caption=ALIVE_INFO,
+                            reply_markup=InlineKeyboardMarkup(buttons)
+                        )
+                )
+
+            if string =="gapps":
+                buttons = [[InlineKeyboardButton("Open GApps", callback_data="open_gapps"),
+                           InlineKeyboardButton("Flame GApps", callback_data="flame_gapps")],
+                           [InlineKeyboardButton("Nik GApps", callback_data="nik_gapps")]]          
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="GApps",
+                            input_message_content=InputTextMessageContent(
+                                "[\u200c](https://i.imgur.com/BZBMrfn.jpg) **LATEST Android 10 arm64 GApps**" 
+                            ),
+                            description="Get Latest GApps Download Links Directly from SF",
+                            thumb_url="https://i.imgur.com/Npzw8Ph.png",
+                            reply_markup=InlineKeyboardMarkup(buttons)
+                        )
+                )
+
+            if string =="repo":        
+                results.append(REPO_X)
+
+            if str_x[0].lower() == "op" and len(str_x) > 1:        
+                txt = i_q[3:]
+                buttons = [[
+                        InlineKeyboardButton("👍", callback_data="opinion_y"),
+                        InlineKeyboardButton("👎", callback_data="opinion_n")
+                ]]                           
+                results.append(
+                        InlineQueryResultArticle(
+                            id=uuid4(),
+                            title="Ask For Opinion",
+                            input_message_content=InputTextMessageContent(txt),
+                            description="e.g @yourbot op Are Cats Cute?",
+                            thumb_url="https://i.imgur.com/Zlc98qS.jpg",
+                            reply_markup=InlineKeyboardMarkup(buttons)
+                        )
+                )    
+
+            if string =="buttonnn":          
+                async for data in BUTTON_BASE.find():
+                    button_data = data['msg_data']
+                text, buttons = pb(button_data)
+                try:
+                    photo_url = data['photo_url']
+                except KeyError:
+                    photo_url = None
+                if photo_url:
+                    results.append(
+                            InlineQueryResultPhoto(
+                                photo_url=photo_url,
+                                caption=text,
+                                reply_markup=buttons
+                            )
+                    )
+                else:    
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title=text,
+                                    input_message_content=InputTextMessageContent(text),
+                                    reply_markup=buttons
+                                )
+                    )
+           
+            if str_x[0].lower() == "secret":
+                if len(str_x) == 3:
+                    user_name = str_x[1]
+                    msg = str_x[2]       
+                    try:
+                        a = await userge.get_users(user_name)
+                        user_id = a.id
+                    except:
+                        return
+                    buttons = [[InlineKeyboardButton("🔐 REVEAL", callback_data="secret_btn")]]
+                    await SECRET_MSG.drop()
+                    SECRET_MSG.insert_one({'user_id': user_id, 'msg': msg})
+                
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title="Send A Secret Message",
+                                    input_message_content=InputTextMessageContent(f"☣️ <b>TOPSECRET!</b> for {user_name}. Only he/she can open it."),
+                                    description="secret @username you message here",
+                                    thumb_url="https://i.imgur.com/lx3nT7p.png",
+                                    reply_markup=InlineKeyboardMarkup(buttons)
+                                )
+                    )
+                else:
+                    buttons_h = [[InlineKeyboardButton("See Help", callback_data="secret_btn_help")]]
+                    results.append(
+                                InlineQueryResultArticle(
+                                    id=uuid4(),
+                                    title="Send A Secret Message",
+                                    input_message_content=InputTextMessageContent("@xyzbot secret @username <your message>"),
+                                    description="secret @username you message here",
+                                    #thumb_url="https://i.imgur.com/lx3nT7p.png"
+                                    reply_markup=InlineKeyboardMarkup(buttons_h)
+                                )
+                    )
+        
+        else:
+            results.append(REPO_X)
+        try: 
+            if not len(results) == 0:
+                await inline_query.answer(results=results, cache_time=1)
+        except MessageEmpty:
+            return
+        

@@ -27,13 +27,13 @@ class Plugin:
         self._client = client
         self.name = name
         self.parent = parent
-        self.about: Optional[str] = None
+        self.doc: Optional[str] = None
         self.commands: List['command.Command'] = []
         self.filters: List['_filter.Filter'] = []
         _LOG.debug(_LOG_STR, f"created plugin -> {self.name}")
 
     def __repr__(self) -> str:
-        return f"plugin {self.name} - {self.about} [{self.commands + self.filters}]"
+        return f"<plugin {self.name} {self.commands + self.filters}>"
 
     @property
     def is_enabled(self) -> bool:
@@ -90,6 +90,10 @@ class Plugin:
         """ returns all unloaded filters """
         return [flt for flt in self.filters if not flt.is_loaded]
 
+    async def init(self) -> None:
+        """ initialize the plugin """
+        await asyncio.gather(*[flt.init() for flt in self.commands + self.filters])
+
     def add(self, obj: Union['command.Command', '_filter.Filter']) -> None:
         """ add command or filter to plugin """
         obj.plugin_name = self.name
@@ -108,10 +112,6 @@ class Plugin:
         """ returns all sorted command names in the plugin """
         return sorted((cmd.name for cmd in self.enabled_commands))
 
-    async def init(self) -> None:
-        """ initialize the plugin """
-        await asyncio.gather(*[flt.init() for flt in self.commands + self.filters])
-
     async def enable(self) -> List[str]:
         """ enable all commands in the plugin """
         if self.is_enabled:
@@ -122,7 +122,7 @@ class Plugin:
             if tmp:
                 enabled.append(tmp)
         if enabled:
-            _LOG.info(_LOG_STR, f"enabled plugin -> {self.name}")
+            _LOG.info(_LOG_STR, f"enabled {self}")
         return enabled
 
     async def disable(self) -> List[str]:
@@ -135,7 +135,7 @@ class Plugin:
             if tmp:
                 disabled.append(tmp)
         if disabled:
-            _LOG.info(_LOG_STR, f"disabled plugin -> {self.name}")
+            _LOG.info(_LOG_STR, f"disabled {self}")
         return disabled
 
     async def load(self) -> List[str]:
@@ -148,7 +148,7 @@ class Plugin:
             if tmp:
                 loaded.append(tmp)
         if loaded:
-            _LOG.info(_LOG_STR, f"loaded plugin -> {self.name}")
+            _LOG.info(_LOG_STR, f"loaded {self}")
         return loaded
 
     async def unload(self) -> List[str]:
@@ -161,5 +161,5 @@ class Plugin:
             if tmp:
                 unloaded.append(tmp)
         if unloaded:
-            _LOG.info(_LOG_STR, f"unloaded plugin -> {self.name}")
+            _LOG.info(_LOG_STR, f"unloaded {self}")
         return unloaded
